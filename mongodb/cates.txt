@@ -1,0 +1,13 @@
+{"_id":{"$oid":"5b0e6a7de36d391584a38699"},"parentId":null,"_w":0,"type":1,"text":"新闻","path":"","__v":0}
+{"_id":{"$oid":"5b0e6afbe36d391584a3869b"},"parentId":{"$oid":"5b0e6a7de36d391584a38699"},"_w":0,"type":1,"text":"国际新闻","path":",5b0e6a7de36d391584a38699","__v":0}
+{"_id":{"$oid":"5b0e6b1fe36d391584a3869c"},"parentId":{"$oid":"5b0e6a7de36d391584a38699"},"_w":0,"type":1,"text":"国内新闻","path":",5b0e6a7de36d391584a38699","__v":0}
+{"_id":{"$oid":"5b0e6b61e36d391584a3869d"},"parentId":{"$oid":"5b0e6b1fe36d391584a3869c"},"_w":0,"type":1,"text":"北京新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c","__v":0}
+{"_id":{"$oid":"5b0e6b66e36d391584a3869e"},"parentId":{"$oid":"5b0e6b1fe36d391584a3869c"},"_w":0,"type":1,"text":"上海新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c","__v":0}
+{"_id":{"$oid":"5b0e6b6ce36d391584a3869f"},"parentId":{"$oid":"5b0e6b1fe36d391584a3869c"},"_w":0,"type":1,"text":"浙江新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c","__v":0}
+{"_id":{"$oid":"5b0e6b7fe36d391584a386a0"},"parentId":{"$oid":"5b0e6b1fe36d391584a3869c"},"_w":0,"type":1,"text":"江苏新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c","__v":0}
+{"_id":{"$oid":"5b0e6babe36d391584a386a1"},"parentId":{"$oid":"5b0e6b6ce36d391584a3869f"},"_w":0,"type":1,"text":"杭州新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c,5b0e6b6ce36d391584a3869f","__v":0}
+{"_id":{"$oid":"5b0e6bb3e36d391584a386a2"},"parentId":{"$oid":"5b0e6b6ce36d391584a3869f"},"_w":0,"type":1,"text":"湖州新闻","path":",5b0e6a7de36d391584a38699,5b0e6b1fe36d391584a3869c,5b0e6b6ce36d391584a3869f","__v":0}
+{"_id":{"$oid":"5b0e6be1e36d391584a386a3"},"parentId":{"$oid":"5b0e6afbe36d391584a3869b"},"_w":0,"type":1,"text":"美国时讯","path":",5b0e6a7de36d391584a38699,5b0e6afbe36d391584a3869b","__v":0}
+{"_id":{"$oid":"5b0e6bebe36d391584a386a4"},"parentId":{"$oid":"5b0e6afbe36d391584a3869b"},"_w":0,"type":1,"text":"欧洲时讯","path":",5b0e6a7de36d391584a38699,5b0e6afbe36d391584a3869b","__v":0}
+{"_id":{"$oid":"5b0e6c08e36d391584a386a5"},"parentId":{"$oid":"5b0e6afbe36d391584a3869b"},"_w":0,"type":1,"text":"非洲时讯","path":",5b0e6a7de36d391584a38699,5b0e6afbe36d391584a3869b","__v":0}
+{"_id":{"$oid":"5b0fdb6976a3602a48a598ca"},"parentId":{"$oid":"5b0e6c08e36d391584a386a5"},"_w":0,"type":1,"text":"南非时讯","path":",5b0e6a7de36d391584a38699,5b0e6afbe36d391584a3869b,5b0e6c08e36d391584a386a5","__v":0}
