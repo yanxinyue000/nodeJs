@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新闻管理</title>
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+</head>
+<body>
+   
+    <ul id="tt"></ul>
+    <div id="mm" class="easyui-menu" style="width:120px;">
+        <div onclick="append()" data-options="iconCls:'icon-add'">Append</div>
+        <div onclick="removeit()" data-options="iconCls:'icon-remove'">Remove</div>
+        <div class="menu-sep"></div>
+        <div onclick="expand()">Expand</div>
+        <div onclick="collapse()">Collapse</div>
+    </div>
+   
+
+        
+</body>
+</html>
+<script>
+   $('#tt').tree({
+        url:'http://localhost:3000/cate/tree/1',
+        method:'get',
+        onContextMenu: function(e, node){
+            e.preventDefault();
+            
+            $('#tt').tree('select', node.target);
+            
+            $('#mm').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        onDblClick: function(node){
+            $(this).tree('beginEdit',node.target);  // alert node text property when clicked
+        },
+        onAfterEdit:function(node){
+
+            $.ajax({
+                url:`http://localhost:3000/cate/data/${node._id}`,
+                type:'put',
+                data:{
+                    // id:node._id,
+                    text:node.text
+                }
+            }).then(function(res){
+                console.log(res);
+            })
+        }
+    });
+
+//增加
+  function append(){
+    var t = $('#tt');
+    var node = t.tree('getSelected');
+        $.ajax({
+            url:`http://localhost:3000/cate/data`,
+            data:{
+                type:1,
+                text: 'new item1',
+                parentId:node._id
+            },
+            type:'post'
+        }).then(function (res) {
+            console.log(res)
+            t.tree('append', {
+                parent: (node?node.target:null),
+                data: [{
+                    text: 'new item1',
+                    id:res._id
+                }]
+            });
+            t.tree('reload');
+        });
+  }
+
+
+
+
+//删除
+        function removeit(){
+            var node = $('#tt').tree('getSelected');
+            $.messager.confirm('删除确认操作', '确认删除嘛?', function(r){
+                if (r){
+                    $.ajax({
+                        url:`http://localhost:3000/cate/data/${node._id}`,
+                        type:'delete'
+                    }).then(res =>{
+                        if(res.status === 200){
+                            $.messager.show({
+                            title:'信息显示',
+                            msg:res.message,
+                            showType:'show'
+                        });
+                        $('#tt').tree('remove', node.target);
+                    }
+                        });
+                    }
+            });
+            //
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function collapse(){
+            var node = $('#tt').tree('getSelected');
+            $('#tt').tree('collapse',node.target);
+        }
+        function expand(){
+            var node = $('#tt').tree('getSelected');
+            $('#tt').tree('expand',node.target);
+        }
+
+</script>

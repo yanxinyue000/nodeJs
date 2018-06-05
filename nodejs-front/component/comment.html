@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>评论管理</title>
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+</head>
+<body>
+        
+        <div class="easyui-layout"data-options="fit:true" >
+           
+            <div data-options="region:'center'" title="评论详情">
+                    
+                    <table id="dg"  style="width:600px;height:400px"></table>
+                   
+            </div>
+           
+      </div>
+      <div id="dlg" class="easyui-dialog" title="数据操作" data-options="iconCls:'icon-save',closed:true" style="width:400px;height:300px;padding:10px">
+            <form id="ff" method="post">
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="_id" style="width:100%" data-options="label:'_Id:'">
+                </div>
+                <div style="margin-bottom:20px">
+                        <input id="cateId" class="easyui-textbox" name="cateId" style="width:100%" data-options="label:'cateId:'">
+                    </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="content" style="width:100%" data-options="multiline:true,label:'评论内容:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="username" style="width:100%" data-options="label:'作者:',required:true">
+                </div>
+                <a href="#" id="dataSumbit" class="easyui-linkbutton" data-options="iconCls:'icon-add'">提交</a>
+                
+            </form>
+        </div>
+    <script>
+
+        var thisURL = document.URL;    
+        var  getval =thisURL.split('?')[1]; 
+        if(getval){
+            var typeid= getval.split("=")[1];
+        } 
+        
+      
+        
+       
+
+
+        
+        //评论详情部分
+        dgInit(typeid)
+       function dgInit(cateId) {
+        var queryParams = {};
+
+        if (cateId) {
+            var queryParams = Object.assign(queryParams, {
+                cateId: cateId
+            })
+        }
+        $('#dg').datagrid({
+            url: 'http://localhost:3000/comment/list',
+            fit: true,
+            pagination: true,
+            pageSize: 5,
+            method: 'post',
+            pageList: [5, 10, 20, 30, 40, 50],
+            queryParams: queryParams,
+            columns: [[
+                { field: 'ck', checkbox: true },
+                { field: 'content', title: '评论内容', width:650 },
+                { field: 'username', title: '作者', width: 100 },
+                { field: 'date', title: '评论时间', width: 160 },
+                {field:'operate',title:'操作',width:150,
+                formatter: function(value,row,index){
+                return "<a href='javascript:void(0)' onclick=onDelete('" + row._id + "')>删除</a> <a href='javascript:void(0)' onclick=onEdit('" + row._id + "')>修改</a>"
+                    }
+                }]],
+            toolbar: [{
+            iconCls: 'icon-add',
+            handler: function () {
+                // 打开之前
+                $('#ff').form('clear');
+                $('#dlg').dialog('open');
+                // $('#cateId').val(cateId);
+                $('#cateId').textbox('setValue',cateId)
+            }
+        }, '-', {
+            iconCls: 'icon-edit',
+            handler: function () { alert('edit') }
+        }, '-', {
+            iconCls: 'icon-remove',
+            handler: function () {
+                var ids = [];
+                // ??删除按钮在点击以后要做的事情是什么？
+                var rows = $("#dg").datagrid('getSelections');
+                if (rows.length > 0) {
+                    for (var i = 0; i < rows.length; i++) {
+                        ids.push(rows[i]._id)
+                    }
+                }
+
+                $.ajax({
+                    url: 'http://localhost:3000/comment/data/removes',
+                    data: {
+                        ids: ids.toString()
+                    },
+                    type: 'post'
+                }).then(res => {
+
+                    $("#dg").datagrid('reload');
+
+                })
+            }
+        }],
+        footer: '#ft'
+        });
+    }
+      
+    $('#dataSumbit').click(function(){
+        
+        var formData=$('#ff').serializeJSON();
+        if(formData._id.trim().length>0){
+            $.ajax({
+                url:`http://localhost:3000/comment/data/${formData._id}`,
+                data:formData,
+                type:'put'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+
+        }else{
+            delete formData._id;
+        $.ajax({
+                url:'http://localhost:3000/comment/data',
+                data:formData,
+                type:'post'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+        }
+  
+    });
+    function onDelete(id){
+        $.messager.confirm('删除确认操作', '确认删除嘛?', function(r){
+                if (r){
+                    $.ajax({
+                        type:'delete',
+                        url:`http://localhost:3000/comment/data/${id}`
+                    }).then(res =>{
+                        console.log(res);
+                        if(res.status === 200){
+                            $.messager.show({
+                            title:'信息显示',
+                            msg:res.message,
+                            showType:'show'
+                        });
+                        $('#dg').datagrid("reload");
+                        }
+                    })
+                }   
+            });
+       
+    }
+    function onEdit(id) {
+        $.ajax({
+            url:`http://localhost:3000/comment/load/${id}`,
+            type:'get'
+        }).then(res=>{
+            $('#ff').form('load', res);
+            $('#dlg').dialog('open');
+        })
+      }
+     
+    
+
+ 
+   
+    </script>
+</body>
+</html>

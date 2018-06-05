@@ -1,0 +1,18 @@
+[
+    {"id":1,"parendId":0,"type":1,"name":"Foods"},
+    {"id":2,"parentId":1,"type":1,"name":"Fruits"},
+    {"id":3,"parentId":1,"type":1,"name":"Vegetables"},
+    {"id":4,"parentId":2,"type":1,"name":"apple"},
+    {"id":5,"parentId":2,"type":1,"name":"orange"},
+    {"id":6,"parentId":3,"type":1,"name":"tomato"},
+    {"id":7,"parentId":3,"type":1,"name":"carrot"},
+    {"id":8,"parentId":3,"type":1,"name":"cabbage"},
+    {"id":9,"parentId":3,"type":1,"name":"potato"},
+    {"id":10,"parentId":3,"type":1,"name":"lettuce"},
+    {"id":11,"parendId":0,"type":2,"name":"Game"},
+    {"id":12,"parentId":11,"type":2,"name":"Fruits"},
+    {"id":13,"parentId":11,"type":2,"name":"Vegetables"},
+    {"id":14,"parentId":12,"type":2,"name":"apple"},
+    {"id":15,"parentId":13,"type":2,"name":"orange"}
+   
+]

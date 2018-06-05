@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户管理</title>
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+</head>
+<body>
+   
+    
+<table id="dg"></table>
+<div id="dlg" class="easyui-dialog" title="数据操作" data-options="iconCls:'icon-save',closed:true" style="width:400px;height:300px;padding:10px">
+    <form id="ff" method="post">
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="_id" style="width:100%" data-options="label:'_Id:'">
+        </div>
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="name" style="width:100%" data-options="label:'姓名:',required:true">
+        </div>
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="password" style="width:100%" data-options="label:'密码:',required:true">
+        </div>
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="email" style="width:100%" data-options="label:'邮箱:',required:true">
+        </div>
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="city" style="width:100%" data-options="label:'城市:',required:true">
+        </div>
+        <div style="margin-bottom:20px">
+            <input class="easyui-textbox" name="age" style="width:100%" data-options="label:'年龄:',required:true">
+        </div>
+        <a href="#" id="dataSumbit" class="easyui-linkbutton" data-options="iconCls:'icon-add'">提交</a>
+        
+    </form>
+</div>
+<div id="ft" style="padding:2px 5px;">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add'">Add</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">Remove</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">Save</a>
+        <input class="easyui-input" id='key' style="width:110px">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-search" onclick="doSearch()">Search</a>
+   </div>
+        
+</body>
+</html>
+<script>
+    $('#dg').datagrid({
+     url:'http://localhost:3000/users/list',
+     fit:true,
+     pagination:true,
+     pageSize:5,
+     pageList:[5,10,20,30,40,50],
+      columns:[[
+         {field:'ck',checkbox:true},
+        {field:'name',title:'姓名',width:100},
+        {field:'email',title:'邮箱',width:100},
+        {field:'age',title:'年龄',width:100},
+        {field:'city',title:'城市',width:100},
+        {field:'operate',title:'操作',width:200,
+        formatter: function(value,row,index){
+        return "<a href='javascript:void(0)' onclick=onDelete('" + row._id + "')>删除</a> <a href='javascript:void(0)' onclick=onEdit('" + row._id + "')>修改</a>"
+			}
+
+    },
+    
+    ]],
+    toolbar: [{
+            iconCls: 'icon-add',
+            handler: function () {
+                // 打开之前
+                $('#ff').form('clear');
+                $('#dlg').dialog('open');
+            }
+        }, '-', {
+            iconCls: 'icon-edit',
+            handler: function () { alert('edit') }
+        }, '-', {
+            iconCls: 'icon-remove',
+            handler: function () {
+                var ids = [];
+                // ??删除按钮在点击以后要做的事情是什么？
+                var rows = $("#dg").datagrid('getSelections');
+                if (rows.length > 0) {
+                    for (var i = 0; i < rows.length; i++) {
+                        ids.push(rows[i]._id)
+                    }
+                }
+                $.ajax({
+                    url: 'http://localhost:3000/users/data/removes',
+                    data: {
+                        ids: ids.toString()
+                    },
+                    type: 'post'
+                }).then(res => {
+
+                    $("#dg").datagrid('reload');
+
+                })
+            }
+        }],
+        footer: '#ft'
+
+});
+    $('#dataSumbit').click(function(){
+        
+        var formData=$('#ff').serializeJSON();
+        if(formData._id.trim().length>0){
+            $.ajax({
+                url:`http://localhost:3000/users/data/${formData._id}`,
+                data:formData,
+                type:'put'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+
+        }else{
+            delete formData._id;
+        $.ajax({
+                url:'http://localhost:3000/users/data',
+                data:formData,
+                type:'post'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+        }
+  
+    });
+    function onDelete(id){
+        $.messager.confirm('删除确认操作', '确认删除嘛?', function(r){
+                if (r){
+                    $.ajax({
+                        type:'delete',
+                        url:`http://localhost:3000/users/data/${id}`
+                    }).then(res =>{
+                        console.log(res);
+                        if(res.status === 200){
+                            $.messager.show({
+                            title:'信息显示',
+                            msg:res.message,
+                            showType:'show'
+                        });
+                        $('#dg').datagrid("reload");
+                        }
+                    })
+                }   
+            });
+       
+    }
+    function onEdit(id) {
+        $.ajax({
+            url:`http://localhost:3000/users/data/${id}`,
+            type:'get',
+        }).then(res=>{
+            $('#ff').form('load', res);
+            $('#dlg').dialog('open');
+        })
+      }
+      function doSearch(){
+        var key = $('#key').val();
+        console.log(key);
+        $.ajax({
+            url:`http://localhost:3000/users/list`,
+            type:'post',
+            data:{
+                name:key
+            }
+        }).then(res=>{
+            console.log(res);
+            if(res){
+                $('#dg').datagrid('reload',{name:key});
+            }
+        });
+}
+
+</script>

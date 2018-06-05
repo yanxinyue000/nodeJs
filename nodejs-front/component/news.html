@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新闻管理</title>
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.serializejson.min.js"></script>
+    <script type="text/javascript" src="../js/moment.min.js"></script>
+</head>
+<body>
+        
+        <div class="easyui-layout"data-options="fit:true" >
+            <div id="p" data-options="region:'west'" title="新闻列表" style="width:20%;padding:10px">
+                <ul id="tt"></ul>  
+            </div>
+            <div data-options="region:'center'" title="新闻详情">
+                    
+                    <table id="dg"  style="width:600px;height:400px"></table>
+                   
+            </div>
+           
+      </div>
+      <div id="dlg" class="easyui-dialog" title="数据操作" data-options="iconCls:'icon-save',closed:true" style="width:400px;height:320px;padding:10px">
+            <form id="ff" method="post">
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="_id" style="width:100%" data-options="label:'_Id:'">
+                </div>
+                <div style="margin-bottom:20px">
+                        <input id="cateId" class="easyui-textbox" name="cateId" style="width:100%" data-options="label:'cateId:'">
+                    </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="title" style="width:100%" data-options="label:'新闻标题:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="content" style="width:100%" data-options="label:'新闻内容:',required:true">
+                </div>
+                <a href="#" id="dataSumbit" class="easyui-linkbutton" data-options="iconCls:'icon-add'">提交</a>
+                
+            </form>
+        </div>
+    <script>
+        // moment.locale('cn', {
+        //     weekdays : [
+        //         "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"
+        //     ]
+        // });
+        // moment.locale('cn', {
+        //     months : [
+        //         "一月", "二月", "三月", "四月", "五月", "六月", "七月",
+        //         "八月", "九月", "十月", "十一月", "十二月"
+        //     ]
+        // });
+       
+        //新闻列表部分
+        $('#tt').tree({
+            url: 'http://localhost:3000/cate/tree/1',
+            method:'get',
+            onClick:function(node){
+                dgInit(node._id)
+            }
+        });
+
+       
+
+
+
+        //新闻详情部分
+        dgInit()
+       function dgInit(cateId) {
+        var queryParams = {};
+
+        if (cateId) {
+            var queryParams = Object.assign(queryParams, {
+                cateId: cateId
+            })
+        }
+        $('#dg').datagrid({
+            url: 'http://localhost:3000/news/list',
+            fit: true,
+            pagination: true,
+            pageSize: 5,
+            method: 'post',
+            pageList: [5, 10, 20, 30, 40, 50],
+            queryParams: queryParams,
+            columns: [[
+                { field: 'ck', checkbox: true },
+                { field: 'title', title: '新闻标题', width:150 },
+                { field: 'content', title: '新闻内容', width: 350 },
+                { field: 'date', title: '时间', width: 160 ,
+                    formatter:function(value,row,index){
+                        return moment(value).format('YYYY-MM-DD HH:mm:ss')
+                    }},
+                { field: 'count', title: '评论总数', width: 60,
+                    formatter:function(value,row,index){
+                        var counts=null;
+                        $.ajax({
+                            url:`http://localhost:3000/comment/data/${row._id}`,
+                            method:'get',
+                            async:false,
+                            success:function(data){
+                                counts=data;
+                                return data;
+                            }
+                        })
+                        return counts;
+                    }            
+                },
+                {field:'operate',title:'操作',width:150,
+                formatter: function(value,row,index){
+                return "<a href='javascript:void(0)' onclick=onDelete('" + row._id + "')>删除</a> <a href='javascript:void(0)' onclick=onEdit('" + row._id + "')>修改</a>&nbsp;&nbsp;&nbsp;<a  href='javascript:void(0)'   onclick=onSee('" + row._id + "')>查看评论</a>"
+                    }
+                }]],
+            toolbar: [{
+            iconCls: 'icon-add',
+            handler: function () {
+                // 打开之前
+                $('#ff').form('clear');
+                $('#dlg').dialog('open');
+                // $('#cateId').val(cateId);
+                $('#cateId').textbox('setValue',cateId)
+            }
+        }, '-', {
+            iconCls: 'icon-edit',
+            handler: function () { alert('edit') }
+        }, '-', {
+            iconCls: 'icon-remove',
+            handler: function () {
+                var ids = [];
+                // ??删除按钮在点击以后要做的事情是什么？
+                var rows = $("#dg").datagrid('getSelections');
+                if (rows.length > 0) {
+                    for (var i = 0; i < rows.length; i++) {
+                        ids.push(rows[i]._id)
+                    }
+                }
+
+                $.ajax({
+                    url: 'http://localhost:3000/news/data/removes',
+                    data: {
+                        ids: ids.toString()
+                    },
+                    type: 'post'
+                }).then(res => {
+
+                    $("#dg").datagrid('reload');
+
+                })
+            }
+        }],
+        footer: '#ft'
+        });
+    }
+      
+    $('#dataSumbit').click(function(){
+        
+        var formData=$('#ff').serializeJSON();
+        if(formData._id.trim().length>0){
+            $.ajax({
+                url:`http://localhost:3000/news/data/${formData._id}`,
+                data:formData,
+                type:'put'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+
+        }else{
+            delete formData._id;
+        $.ajax({
+                url:'http://localhost:3000/news/data',
+                data:formData,
+                type:'post'
+            }).then(function (res) { 
+
+                $('#dlg').dialog('close');
+                $('#dg').datagrid("reload");
+            } )
+        }
+  
+    });
+    function onDelete(id){
+        $.messager.confirm('删除确认操作', '确认删除嘛?', function(r){
+                if (r){
+                    $.ajax({
+                        type:'delete',
+                        url:`http://localhost:3000/news/data/${id}`
+                    }).then(res =>{
+                        console.log(res);
+                        if(res.status === 200){
+                            $.messager.show({
+                            title:'信息显示',
+                            msg:res.message,
+                            showType:'show'
+                        });
+                        $('#dg').datagrid("reload");
+                        }
+                    })
+                }   
+            });
+       
+    }
+    function onEdit(id) {
+        $.ajax({
+            url:`http://localhost:3000/news/data/${id}`,
+            type:'get',
+        }).then(res=>{
+            $('#ff').form('load', res);
+            $('#dlg').dialog('open');
+        })
+      }
+      function doSearch(){
+        var key = $('#key').val();
+        console.log(key);
+        $.ajax({
+            url:`http://localhost:3000/users/list`,
+            type:'post',
+            data:{
+                name:key
+            }
+        }).then(res=>{
+            // console.log(res);
+            if(res){
+                $('#dg').datagrid('reload',{name:key});
+            }
+        });
+}
+    
+
+    //评论
+    function onSee(id){
+        var title = '评论管理';
+        var url = 'component/comment.html?id='+id
+        parent.addTab(title, url);
+    }
+    </script>
+</body>
+</html>
